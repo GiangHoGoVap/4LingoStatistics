@@ -1,0 +1,2 @@
+# 4LingoStatistics
+Debug mode
