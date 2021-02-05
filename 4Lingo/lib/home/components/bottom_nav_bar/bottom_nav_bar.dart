@@ -42,7 +42,7 @@ class MyBottomNavBar extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FlashCard(),
+                  builder: (context) => FlashCardFuture(),
                 ),
               );
             },
@@ -52,8 +52,8 @@ class MyBottomNavBar extends StatelessWidget {
               FontAwesome5.chart_line,
               color: Colors.blue,
             ),
-            onPressed: () {
-              vs.statFuture = StatDBInteract.getStatistics(0);
+            onPressed: () async {
+              await StatDBInteract.updateStat();
               Navigator.push(
                 context,
                 MaterialPageRoute(

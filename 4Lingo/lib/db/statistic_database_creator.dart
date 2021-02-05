@@ -27,6 +27,7 @@ class StatDBCreator
   static const key = 'key';
   static const remember = 'remember';
   static const vocabs = 'vocabs';
+  static const temp = 'temp';
   static void databaseLog(String functionName, String sql,
       [List<Map<String, dynamic>> selectQueryResult,
         int insertAndUpdateResult,
@@ -50,7 +51,8 @@ class StatDBCreator
       $type INT,
       $key INT,
       $remember INT,
-      $vocabs INT
+      $vocabs INT,
+      $temp INT
     )
       ''';
     await db.execute(sql);
@@ -73,21 +75,24 @@ class StatDBCreator
       int cnt = 0;
       for(int i = 1; i <= 7; i ++){
 
-        StatDBInteract.insertToDB(cnt,0, i, 0, 0);
+        StatDBInteract.insertToDB(cnt,0, i, 0, 0,0);
         cnt++;
       }
       for(int i = 1; i <= 5; i ++){
-        StatDBInteract.insertToDB(cnt,1, i, 0, 0);
+        StatDBInteract.insertToDB(cnt,1, i, 0, 0,0);
         cnt++;
       }
       for(int i = 1; i <= 12; i ++){
-        StatDBInteract.insertToDB(cnt,2, i, 0, 0);
+        StatDBInteract.insertToDB(cnt,2, i, 0, 0,0);
         cnt++;
       }
-      StatDBInteract.insertToDB(cnt,3, 1, 0, 0);
+      StatDBInteract.insertToDB(cnt,3, 1, 0, 0,0);
+      DateTime currentTime = DateTime.now();
+      StatDBInteract.insertToDB(25, 4,currentTime.weekday, currentTime.day, currentTime.month,
+          currentTime.year);
     }
     print(db1);
-    StatDBInteract.printDB();
+    //StatDBInteract.printDB();
     return;
   }
   Future<void> onCreate(Database db, int version) async{

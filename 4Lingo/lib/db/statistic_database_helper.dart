@@ -1,3 +1,6 @@
+
+import 'package:fluttericon/octicons_icons.dart';
+
 import 'statistic_database_creator.dart';
 import '../models/stat.dart';
 class StatDBInteract {
@@ -39,14 +42,14 @@ class StatDBInteract {
   {
     final sql = '''
     UPDATE ${StatDBCreator.tableName}
-    SET ${StatDBCreator.remember} = 0 
+    SET ${StatDBCreator.remember} = 0, ${StatDBCreator.vocabs} = 0 
     WHERE ${StatDBCreator.type} = $type  
     ''';
+    await db1.rawUpdate(sql);
     return;
   }
 
-  static Future<void> insertToDB(int id, int type, int key, int rem,
-      int vocabs) async
+  static Future<void> insertToDB(int id, int type, int key, int rem, int vocabs, int tmp ) async
   {
     String sql = '''
     INSERT INTO ${StatDBCreator.tableName} (
@@ -54,31 +57,32 @@ class StatDBInteract {
       ${StatDBCreator.type},
       ${StatDBCreator.key},
       ${StatDBCreator.remember},
-      ${StatDBCreator.vocabs}
+      ${StatDBCreator.vocabs},
+      ${StatDBCreator.temp}
     ) VALUES
-    (?,?,?,?,?)
+    (?,?,?,?,?,?)
     ''';
-    db1.execute(sql, [id, type, key, rem, vocabs]);
+    db1.execute(sql, [id, type, key, rem, vocabs, tmp]);
     return;
   }
 
-  static Future<void> printDB() async{
+  static Future<void> printDB() async {
     String sql = '''
     SELECT * FROM ${StatDBCreator.tableName}
     ''';
     final data = await db1.rawQuery(sql);
-    for(final node in data)
-      {
-        print(node['id']);
-        print(node['type']);
-        print(node['key']);
-        print(node['vocabs']);
-        print(node['remember']);
-        print('end Record');
-      }
+    for (final node in data) {
+      print(node['id']);
+      print(node['type']);
+      print(node['key']);
+      print(node['remember']);
+      print(node['vocabs']);
+      print(node['temp']);
+      print('end Record');
+    }
     return;
   }
-}
+
 //  static Future<int> todosCount() async {
 //    final data = await db1
 //        .rawQuery('SELECT MAX(id) FROM ${StatDBCreator.tableName}');
@@ -88,3 +92,65 @@ class StatDBInteract {
 //    return idForNewItem;
 //  }
 
+  static Future<void> updateStat() async
+  {
+    Map<String, String> tmp = {
+      'weekday': 'key',
+      'day': 'remember',
+      'month': 'vocabs',
+      'year': 'temp'
+    };
+    DateTime currentTime = DateTime.now();
+    String sql = '''
+    SELECT * FROM ${StatDBCreator.tableName}
+    WHERE ${StatDBCreator.type} = 4
+    ''';
+    final data = await db1.rawQuery(sql);
+    if(data == null)
+    {
+      print("NULL");
+      return;
+    }
+    final timeData = data.elementAt(0);
+
+    print("NOT NULL");
+    final month = timeData[tmp['month']];
+    final year = timeData[tmp['year']];
+    final weekday = timeData[tmp['weekday']];
+    final day = timeData[tmp['day']];
+    DateTime prevTime = new DateTime(year,month,day);
+    print(prevTime);
+    print(currentTime);
+
+    if(checkSameWeek(prevTime,currentTime) == false) {
+      print("Resetting week");
+      StatDBInteract.resetDB(0);
+    }
+      if(month != currentTime.month || year != currentTime.year) {
+        StatDBInteract.resetDB(1);
+      }
+      if(year != currentTime.year) {
+        StatDBInteract.resetDB(2);
+      }
+      String sql2 = '''
+      UPDATE ${StatDBCreator.tableName}
+      SET  ${StatDBCreator.key} = ${currentTime.weekday}
+      ,${StatDBCreator.remember} = ${currentTime.day}
+      ,${StatDBCreator.vocabs} = ${currentTime.month}
+      , ${StatDBCreator.temp} = ${currentTime.year}
+      WHERE ${StatDBCreator.type} = 4
+      ''';
+      await db1.rawUpdate(sql2);
+      return;
+    }
+  }
+  bool checkSameWeek(DateTime a , DateTime b)
+  {
+    final difference = b.difference(a).inDays;
+    print(difference);
+    print(b.weekday);
+    print(a.weekday);
+    if(difference < 7 && b.weekday >= a.weekday && difference >=0)
+      return true;
+    return false;
+  }

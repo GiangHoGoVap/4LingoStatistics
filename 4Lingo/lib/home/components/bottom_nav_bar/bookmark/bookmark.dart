@@ -5,7 +5,35 @@ import 'package:ForLingo/models/vocab.dart';
 import 'package:ForLingo/db/interact_with_db.dart' ;
 import 'package:ForLingo/db/statistic_database_helper.dart';
 import 'package:ForLingo/models/stat.dart';
+import 'package:ForLingo/vocabs_interface.dart' as vs;
+class FlashCardFuture extends StatefulWidget {
+  @override
+  _FlashCardFutureState createState() => _FlashCardFutureState();
+}
+
+class _FlashCardFutureState extends State<FlashCardFuture> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Vocab>>(
+      future: vs.future,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return FlashCard(snapshot.data);
+        } else {
+          return Center(
+            child: Text(
+              "Loading....",
+              style: TextStyle(fontSize: 40),
+            ),
+          );
+        }
+      },
+    );
+  }
+}
 class FlashCard extends StatefulWidget {
+  final List<Vocab> myWordlist;
+  FlashCard(this.myWordlist);
   @override
   _FlashCardState createState() => _FlashCardState();
 }
@@ -16,14 +44,14 @@ class _FlashCardState extends State<FlashCard> {
   int diffKey = 0;
   Widget flashcard;
   List<Vocab> wordlist = List();
-  void _loadData() async {
-    wordlist = await DBInteract.getAllVocabs(isSorted: false);
-  }
+//  void _loadData() async {
+//    wordlist = await DBInteract.getAllVocabs(isSorted: false);
+//  }
   @override
   void initState() {
     super.initState();
-    _loadData();
-    print(wordlist);
+    wordlist = widget.myWordlist;
+    print("Wordlist: $wordlist");
     totalWords = wordlist.length;
     if (totalWords != 0) {
       // this mean that user have some words to learn

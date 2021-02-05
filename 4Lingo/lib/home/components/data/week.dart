@@ -39,7 +39,6 @@ class _WeekDataState extends State<WeekData> {
       builder: (context,snapshot)  {
         if(snapshot.hasData)
         {
-          StatDBInteract.printDB();
           Week myfirstweek = Week(snapshot.data);
           final List<ChartData> dulieudothi1 = [
             ChartData(
