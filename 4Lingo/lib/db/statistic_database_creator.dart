@@ -3,6 +3,7 @@ import 'package:ForLingo/db/interact_with_db.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'statistic_database_helper.dart';
+
 /*
  *  This file create a database called `lingoStat`
  *  In this db, there is a table called `statistics`
@@ -19,8 +20,8 @@ import 'statistic_database_helper.dart';
  //reset values of days,weeks,months to 0 after every week, month and year
  */
 Database db1;
-class StatDBCreator
-{
+
+class StatDBCreator {
   static const tableName = 'stats';
   static const id = 'id';
   static const type = 'type';
@@ -30,8 +31,8 @@ class StatDBCreator
   static const temp = 'temp';
   static void databaseLog(String functionName, String sql,
       [List<Map<String, dynamic>> selectQueryResult,
-        int insertAndUpdateResult,
-        List<dynamic> params]) {
+      int insertAndUpdateResult,
+      List<dynamic> params]) {
     print(functionName);
     print(sql);
     if (params != null) {
@@ -44,7 +45,8 @@ class StatDBCreator
       print(insertAndUpdateResult);
     }
   }
-  Future<void> createStatTable(Database db) async{
+
+  Future<void> createStatTable(Database db) async {
     final sql = '''
     CREATE TABLE IF NOT EXISTS $tableName (
       $id INTEGER PRIMARY KEY,
@@ -57,46 +59,46 @@ class StatDBCreator
       ''';
     await db.execute(sql);
   }
-  Future<String> getDBPath(String dbName) async{
+
+  Future<String> getDBPath(String dbName) async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath,dbName);
+    final path = join(dbPath, dbName);
     bool checkDir = await Directory(dirname(path)).exists();
-    if(!checkDir){
+    if (!checkDir) {
       await Directory(dirname(path)).create(recursive: true);
     }
     return path;
   }
-  Future<void> initDB() async
-  {
+
+  Future<void> initDB() async {
     final path = await getDBPath('lingoStat');
     bool checkExist = await databaseFactory.databaseExists(path);
-    db1 = await openDatabase(path,version: 1, onCreate: onCreate);
-    if(checkExist == false){
+    db1 = await openDatabase(path, version: 1, onCreate: onCreate);
+    if (checkExist == false) {
       int cnt = 0;
-      for(int i = 1; i <= 7; i ++){
-
-        StatDBInteract.insertToDB(cnt,0, i, 0, 0,0);
+      for (int i = 1; i <= 7; i++) {
+        StatDBInteract.insertToDB(cnt, 0, i, 0, 0, 0);
         cnt++;
       }
-      for(int i = 1; i <= 5; i ++){
-        StatDBInteract.insertToDB(cnt,1, i, 0, 0,0);
+      for (int i = 1; i <= 5; i++) {
+        StatDBInteract.insertToDB(cnt, 1, i, 0, 0, 0);
         cnt++;
       }
-      for(int i = 1; i <= 12; i ++){
-        StatDBInteract.insertToDB(cnt,2, i, 0, 0,0);
+      for (int i = 1; i <= 12; i++) {
+        StatDBInteract.insertToDB(cnt, 2, i, 0, 0, 0);
         cnt++;
       }
-      StatDBInteract.insertToDB(cnt,3, 1, 0, 0,0);
+      StatDBInteract.insertToDB(cnt, 3, 1, 0, 0, 0);
       DateTime currentTime = DateTime.now();
-      StatDBInteract.insertToDB(25, 4,currentTime.weekday, currentTime.day, currentTime.month,
-          currentTime.year);
+      StatDBInteract.insertToDB(25, 4, currentTime.weekday, currentTime.day,
+          currentTime.month, currentTime.year);
     }
     print(db1);
     //StatDBInteract.printDB();
     return;
   }
-  Future<void> onCreate(Database db, int version) async{
+
+  Future<void> onCreate(Database db, int version) async {
     await createStatTable(db);
   }
-
 }

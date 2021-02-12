@@ -1,6 +1,13 @@
+import 'package:ForLingo/home/components/bottom_nav_bar/bookmark/statics.dart';
+import 'package:ForLingo/home/components/data/week.dart';
+import 'package:path/path.dart';
+import 'package:ForLingo/home/home_page.dart';
 import 'package:charts_flutter/flutter.dart' as dothi;
 import 'package:flutter/material.dart';
 import 'package:ForLingo/models/stat.dart';
+import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 class Day {
   // Number of vocabs you wish to remember
   int vocabs;
@@ -35,7 +42,7 @@ class Week {
     myWeek = temp;
     numLearnedVocabs = 0;
     totalVocabs = 0;
-    for(final node in myWeek){
+    for (final node in myWeek) {
       numLearnedVocabs += node.remember;
       totalVocabs += node.vocabs;
     }
@@ -72,7 +79,7 @@ class Month {
     myMonth = temp;
     monthTotalLearned = 0;
     monthTotalVocab = 0;
-    for (final node in myMonth ) {
+    for (final node in myMonth) {
       monthTotalLearned += node.remember;
       monthTotalVocab += node.vocabs;
     }

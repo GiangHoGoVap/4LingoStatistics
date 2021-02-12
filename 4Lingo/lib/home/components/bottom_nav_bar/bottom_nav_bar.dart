@@ -37,7 +37,6 @@ class MyBottomNavBar extends StatelessWidget {
               color: Colors.blue,
             ),
             onPressed: () {
-
               //Bookmark popup
               Navigator.push(
                 context,
@@ -52,8 +51,8 @@ class MyBottomNavBar extends StatelessWidget {
               FontAwesome5.chart_line,
               color: Colors.blue,
             ),
-            onPressed: () async {
-              await StatDBInteract.updateStat();
+            onPressed: () {
+              //vs.future = StatDBInteract.updateStat();
               Navigator.push(
                 context,
                 MaterialPageRoute(

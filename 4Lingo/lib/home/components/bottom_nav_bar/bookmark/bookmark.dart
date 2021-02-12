@@ -1,11 +1,13 @@
+import 'package:ForLingo/db/database_creator.dart';
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:ForLingo/global.dart' as globals;
 import 'package:ForLingo/models/vocab.dart';
-import 'package:ForLingo/db/interact_with_db.dart' ;
+import 'package:ForLingo/db/interact_with_db.dart';
 import 'package:ForLingo/db/statistic_database_helper.dart';
 import 'package:ForLingo/models/stat.dart';
 import 'package:ForLingo/vocabs_interface.dart' as vs;
+
 class FlashCardFuture extends StatefulWidget {
   @override
   _FlashCardFutureState createState() => _FlashCardFutureState();
@@ -31,6 +33,7 @@ class _FlashCardFutureState extends State<FlashCardFuture> {
     );
   }
 }
+
 class FlashCard extends StatefulWidget {
   final List<Vocab> myWordlist;
   FlashCard(this.myWordlist);
@@ -42,15 +45,25 @@ class _FlashCardState extends State<FlashCard> {
   int currWordIndex = 0;
   int totalWords = 0;
   int diffKey = 0;
+  int setRem = 0;
   Widget flashcard;
   List<Vocab> wordlist = List();
-//  void _loadData() async {
-//    wordlist = await DBInteract.getAllVocabs(isSorted: false);
-//  }
+  void _loadData() async {
+    wordlist = await DBInteract.getAllVocabs(isSorted: false);
+  }
+
+  void resetIsRemember() {
+    for (int i = 0; i < wordlist.length; i++) {
+      wordlist[i].isRemember = 0;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    wordlist = widget.myWordlist;
+    _loadData();
+    resetIsRemember();
+    wordlist = List.from(widget.myWordlist);
     print("Wordlist: $wordlist");
     totalWords = wordlist.length;
     if (totalWords != 0) {
@@ -78,13 +91,15 @@ class _FlashCardState extends State<FlashCard> {
 
   // this function is called when user hit "NO"
   void nextCard() {
-    setState(() {
-      if (currWordIndex < wordlist.length - 1) {
-        currWordIndex += 1;
-      } else {
-        currWordIndex = 0;
-      }
-    });
+    setState(
+      () {
+        if (currWordIndex < wordlist.length - 1) {
+          currWordIndex += 1;
+        } else {
+          currWordIndex = 0;
+        }
+      },
+    );
     animationKey();
   }
 
@@ -109,6 +124,12 @@ class _FlashCardState extends State<FlashCard> {
       } else {
         flashcard = Text('Congratulation! You have learned all the words.');
       }
+    });
+  }
+
+  void setIsRemember() {
+    setState(() {
+      wordlist[currWordIndex].isRemember = 1;
     });
   }
 
@@ -168,7 +189,8 @@ class _FlashCardState extends State<FlashCard> {
                           child: Icon(Icons.close, size: 30.0),
                           textColor: Colors.white,
                           color: Colors.red,
-                          onPressed: () {
+                          onPressed: () async {
+                            setIsRemember();
                             nextCard();
                             animationFlashCard();
                           },
@@ -184,9 +206,10 @@ class _FlashCardState extends State<FlashCard> {
                           textColor: Colors.white,
                           color: Colors.green,
                           onPressed: () async {
+                            await updateDataBase(
+                                wordlist[currWordIndex].isRemember);
                             rmRememberCard();
                             animationFlashCard();
-                            await updateDataBase();
                           },
                         ),
                       ),
@@ -288,24 +311,29 @@ class _NumberQuestionState extends State<NumberQuestion> {
     }
   }
 }
-Future<void> updateDataBase() async
-{
-  DateTime currentTime = DateTime.now();
-  int week;
-  int day = currentTime.day;
-  if(day <= 7)
-    week = 1;
-  else if(day <=14)
-    week = 2;
-  else if(day <= 21)
-    week = 3;
-  else if(day <= 28)
-    week = 4;
-  else
-    week = 5;
-  await StatDBInteract.upDateVocabRem(0, currentTime.weekday);
-  await StatDBInteract.upDateVocabRem(1, week);
-  await StatDBInteract.upDateVocabRem(2, currentTime.month);
-  await StatDBInteract.upDateVocabRem(3, 1);
+
+Future<void> updateDataBase(int isRem) async {
+  if (isRem == 1)
+    print("Nothing");
+  else {
+    DateTime currentTime = DateTime.now();
+    int week;
+    int day = currentTime.day;
+    if (day <= 7)
+      week = 1;
+    else if (day <= 14)
+      week = 2;
+    else if (day <= 21)
+      week = 3;
+    else if (day <= 28)
+      week = 4;
+    else
+      week = 5;
+
+    await StatDBInteract.upDateVocabRem(0, currentTime.weekday);
+    await StatDBInteract.upDateVocabRem(1, week);
+    await StatDBInteract.upDateVocabRem(2, currentTime.month);
+    await StatDBInteract.upDateVocabRem(3, 1);
+  }
   return;
 }
